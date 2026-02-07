@@ -1,0 +1,134 @@
+:root {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --primary: #bb86fc;
+    --secondary: #03dac6;
+    --text: #e0e0e0;
+    --input-bg: #2c2c2c;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+h1, h2, h3 { margin-top: 0; }
+h1 { text-align: center; color: var(--primary); }
+.subtitle { text-align: center; color: #888; margin-bottom: 20px; font-size: 0.9rem;}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.row { display: flex; gap: 15px; }
+.input-wrapper { flex: 1; }
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    color: #aaa;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: var(--input-bg);
+    color: white;
+    font-size: 1rem;
+    box-sizing: border-box; /* Important for padding */
+    margin-bottom: 10px;
+}
+
+.tab-container { display: flex; gap: 10px; margin-bottom: 15px; }
+.tab-btn {
+    flex: 1;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.tab-btn.active { background: var(--primary); color: #000; }
+
+.hidden { display: none; }
+
+.action-btn {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--secondary);
+    color: #000;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 30px;
+}
+
+#exerciseList {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+    border-top: 1px solid #333;
+}
+#exerciseList li {
+    padding: 8px 0;
+    border-bottom: 1px solid #333;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.total-burn { text-align: right; font-weight: bold; color: var(--secondary); }
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.stat-box {
+    background: #2c2c2c;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+}
+.stat-label { display: block; font-size: 0.7rem; color: #888; }
+.stat-val { display: block; font-size: 1.1rem; font-weight: bold; color: var(--secondary); }
+
+.prediction-box {
+    background: rgba(3, 218, 198, 0.1);
+    border-left: 4px solid var(--secondary);
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.chart-container { position: relative; height: 300px; width: 100%; }
