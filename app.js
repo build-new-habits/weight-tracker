@@ -1,8 +1,12 @@
 // --- CONFIGURATION ---
-const TARGET_WEIGHT_LBS = 159; // 11st 5lb
-const TARGET_DATE = new Date('2026-04-05'); // Easter Sunday 2026
-const USER_HEIGHT_CM = 175; // Average height (Change this if you want accuracy)
-const USER_AGE = 35; // Average age (Change for accuracy)
+const TARGET_WEIGHT_LBS = 161; // 11st 7lb
+const TARGET_DATE = new Date('2026-05-31'); // May 31st 2026
+const START_DATE = new Date('2026-02-07'); // Start of project
+const START_WEIGHT_LBS = 178; // 12st 10lb
+
+// User Stats (Change these for better Calorie accuracy)
+const USER_HEIGHT_CM = 175; 
+const USER_AGE = 35; 
 const USER_SEX = 'male'; 
 
 // --- STATE MANAGEMENT ---
@@ -11,12 +15,13 @@ let appData = JSON.parse(localStorage.getItem('easterTrackerData')) || [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Set date input to today
     document.getElementById('entryDate').valueAsDate = new Date();
+    
     updateCountdown();
     renderChart();
     updateDashboard();
-    
-    // Load today's data if it exists
+    renderMilestones(); 
     loadToday();
 });
 
@@ -36,12 +41,23 @@ function toggleActivityMode(mode) {
 
 function updateCountdown() {
     const today = new Date();
-    const diffTime = Math.abs(TARGET_DATE - today);
+    const diffTime = TARGET_DATE - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-    document.getElementById('countdown').innerText = `${diffDays} days until Easter Deadline`;
+    
+    if (diffDays > 0) {
+        document.getElementById('countdown').innerText = `${diffDays} days until Target`;
+    } else {
+        document.getElementById('countdown').innerText = "Target Date Reached!";
+    }
 }
 
-// --- CALCULATORS ---
+// --- CONVERTERS ---
+function lbsToStones(lbs) {
+    const st = Math.floor(lbs / 14);
+    const remainder = (lbs % 14).toFixed(1);
+    return `${st}st ${remainder}lb`;
+}
+
 function getWeightInLbs() {
     const st = parseFloat(document.getElementById('weightSt').value) || 0;
     const lb = parseFloat(document.getElementById('weightLb').value) || 0;
@@ -49,12 +65,11 @@ function getWeightInLbs() {
     return (st * 14) + lb;
 }
 
+// --- CALCULATORS ---
 function calculateCalories(met, mins) {
-    // Formula: MET * Weight(kg) * Time(hours)
-    // We use current weight from input, or fallback to last known weight
     let lbs = getWeightInLbs();
     if(lbs === 0 && appData.length > 0) lbs = appData[appData.length-1].weight;
-    if(lbs === 0) lbs = 178; // Fallback to starting weight (12st 10)
+    if(lbs === 0) lbs = START_WEIGHT_LBS;
     
     const kg = lbs * 0.453592;
     const hours = mins / 60;
@@ -84,7 +99,6 @@ function pushExercise(name, duration, cals) {
     dailyExercises.push({ name, duration, cals });
     renderExerciseList();
     
-    // Clear inputs
     document.getElementById('activityMins').value = '';
     document.getElementById('manualCals').value = '';
 }
@@ -99,7 +113,7 @@ function renderExerciseList() {
         list.innerHTML += `
             <li>
                 <span>${ex.name} (${ex.duration}m)</span>
-                <span>${ex.cals} kcal <button onclick="removeExercise(${index})" style="color:red;background:none;border:none;">x</button></span>
+                <span>${ex.cals} kcal <button onclick="removeExercise(${index})" style="color:red;background:none;border:none;cursor:pointer;">x</button></span>
             </li>
         `;
     });
@@ -122,15 +136,11 @@ function saveDay() {
     const water = parseFloat(document.getElementById('waterMl').value) || 0;
     const drinks = document.getElementById('drinksDetails').value;
     
-    // Calculate Total Burned from Exercises
     const exerciseBurn = dailyExercises.reduce((sum, item) => sum + item.cals, 0);
 
-    // Calculate TDEE (Base Metabolic Rate)
-    // Mifflin-St Jeor Equation approx
+    // TDEE Calc
     const weightKg = weightLbs * 0.453592;
-    // BMR
     let bmr = (10 * weightKg) + (6.25 * USER_HEIGHT_CM) - (5 * USER_AGE) + 5; 
-    // Sedentary Multiplier (we add exercise separately)
     let tdee = bmr * 1.2; 
     
     const dayData = {
@@ -144,7 +154,6 @@ function saveDay() {
         netCals: (foodCals - (tdee + exerciseBurn))
     };
 
-    // Check if date exists and overwrite, else push
     const existingIndex = appData.findIndex(d => d.date === date);
     if (existingIndex > -1) {
         appData[existingIndex] = dayData;
@@ -152,15 +161,13 @@ function saveDay() {
         appData.push(dayData);
     }
     
-    // Sort by date
     appData.sort((a,b) => new Date(a.date) - new Date(b.date));
-
-    // Save to LocalStorage
     localStorage.setItem('easterTrackerData', JSON.stringify(appData));
     
     alert("Data Saved!");
     updateDashboard();
     renderChart();
+    renderMilestones(); 
 }
 
 function loadToday() {
@@ -175,9 +182,6 @@ function loadToday() {
         document.getElementById('foodCals').value = dayData.foodIn;
         document.getElementById('waterMl').value = dayData.water;
         document.getElementById('drinksDetails').value = dayData.drinks || "";
-        // Note: We don't reload specific exercises for simplicity in this version, 
-        // just the calculated totals if we were to expand logic. 
-        // For now, exercise list resets on refresh but totals are saved in 'exerciseOut' in history.
     }
 }
 
@@ -186,16 +190,12 @@ function updateDashboard() {
     if(appData.length === 0) return;
     
     const current = appData[appData.length - 1];
-    const st = Math.floor(current.weight / 14);
-    const lb = (current.weight % 14).toFixed(1);
-    
-    document.getElementById('currentWeightDisplay').innerText = `${st}st ${lb}lb`;
+    document.getElementById('currentWeightDisplay').innerText = lbsToStones(current.weight);
     
     const lossNeeded = current.weight - TARGET_WEIGHT_LBS;
     document.getElementById('lossRequiredDisplay').innerText = lossNeeded > 0 ? `${lossNeeded.toFixed(1)} lbs` : "GOAL HIT!";
 
-    // Simple Prediction
-    // Calculate average daily loss over last 7 entries
+    // Prediction Logic
     if(appData.length >= 2) {
         const last7 = appData.slice(-7);
         const first = last7[0];
@@ -203,20 +203,81 @@ function updateDashboard() {
         const dayDiff = (new Date(last.date) - new Date(first.date)) / (1000*60*60*24);
         
         if (dayDiff > 0) {
-            const weightDiff = last.weight - first.weight; // should be negative
-            const dailyRate = weightDiff / dayDiff; // lbs per day
+            const weightDiff = last.weight - first.weight; 
+            const dailyRate = weightDiff / dayDiff; 
             
-            const daysToEaster = (TARGET_DATE - new Date()) / (1000*60*60*24);
-            const predictedWeight = last.weight + (dailyRate * daysToEaster);
-            const pSt = Math.floor(predictedWeight / 14);
-            const pLb = (predictedWeight % 14).toFixed(1);
+            const daysToTarget = (TARGET_DATE - new Date()) / (1000*60*60*24);
+            const predictedWeight = last.weight + (dailyRate * daysToTarget);
             
             let msg = `Current trend: ${dailyRate.toFixed(2)} lbs/day. `;
-            msg += `Easter Forecast: <strong>${pSt}st ${pLb}lb</strong>. `;
-            msg += (predictedWeight < TARGET_WEIGHT_LBS) ? "You are on track! 🎉" : "You need to increase deficit. ⚠️";
+            msg += `Projected Finish: <strong>${lbsToStones(predictedWeight)}</strong>. `;
+            
+            if (predictedWeight <= TARGET_WEIGHT_LBS) {
+                 msg += "<span style='color:#03dac6'>On Track! 🎉</span>";
+            } else {
+                 msg += "<span style='color:#ff5555'>Behind Schedule.</span>";
+            }
             
             document.getElementById('predictionText').innerHTML = msg;
         }
+    }
+}
+
+// --- NEW MILESTONE GENERATOR ---
+function renderMilestones() {
+    const tbody = document.getElementById('milestone-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const totalDays = (TARGET_DATE - START_DATE) / (1000 * 60 * 60 * 24);
+    const totalLoss = START_WEIGHT_LBS - TARGET_WEIGHT_LBS;
+    const lossPerDay = totalLoss / totalDays;
+
+    // Loop through weeks
+    let currentDate = new Date(START_DATE);
+    // Move to next Sunday
+    currentDate.setDate(currentDate.getDate() + (7 - currentDate.getDay()));
+
+    while (currentDate <= TARGET_DATE) {
+        // Calculate Target Weight for this date
+        const daysPassed = (currentDate - START_DATE) / (1000 * 60 * 60 * 24);
+        const targetW = START_WEIGHT_LBS - (lossPerDay * daysPassed);
+        
+        // Check actual status if we have data for this week
+        let status = "-";
+        let statusColor = "#888";
+        
+        const closeEntry = appData.find(d => {
+            const dDate = new Date(d.date);
+            const diff = Math.abs(dDate - currentDate) / (1000*60*60*24);
+            return diff <= 3; 
+        });
+
+        if (closeEntry) {
+            const diff = closeEntry.weight - targetW;
+            if (diff <= 0.5) {
+                status = "✅ Met";
+                statusColor = "#03dac6"; // Green
+            } else {
+                status = `⚠️ +${diff.toFixed(1)}lb`;
+                statusColor = "#ff5555"; // Red
+            }
+        } else if (currentDate < new Date()) {
+            status = "❌ Missed";
+             statusColor = "#555";
+        }
+
+        const row = `
+            <tr style="border-bottom: 1px solid #333;">
+                <td style="padding: 12px 8px;">${currentDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</td>
+                <td style="text-align: right; padding: 12px 8px; font-weight: bold;">${lbsToStones(targetW)}</td>
+                <td style="text-align: right; padding: 12px 8px; color: ${statusColor};">${status}</td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+
+        // Add 7 days
+        currentDate.setDate(currentDate.getDate() + 7);
     }
 }
 
@@ -228,12 +289,9 @@ function renderChart() {
     const labels = appData.map(d => d.date);
     const weights = appData.map(d => d.weight);
     
-    // Create Target Line
-    const startDate = appData.length > 0 ? appData[0].date : new Date().toISOString().split('T')[0];
-    const startWeight = appData.length > 0 ? appData[0].weight : 178;
-    
-    const targetLine = [
-        { x: startDate, y: startWeight },
+    // Create Target Line (Start to End)
+    const idealLine = [
+        { x: START_DATE.toISOString().split('T')[0], y: START_WEIGHT_LBS },
         { x: TARGET_DATE.toISOString().split('T')[0], y: TARGET_WEIGHT_LBS }
     ];
 
@@ -252,7 +310,7 @@ function renderChart() {
                 },
                 {
                     label: 'Target Path',
-                    data: targetLine,
+                    data: idealLine,
                     borderColor: '#bb86fc',
                     borderDash: [5, 5],
                     pointRadius: 0
@@ -265,7 +323,7 @@ function renderChart() {
             scales: {
                 x: {
                     type: 'time',
-                    time: { unit: 'day' },
+                    time: { unit: 'month' },
                     grid: { color: '#333' }
                 },
                 y: {
@@ -285,5 +343,5 @@ function clearData() {
 
 function exportData() {
     console.log(JSON.stringify(appData));
-    alert("Check browser console for raw JSON data.");
+    alert("Data logged to Console");
 }
