@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easter Weight Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Road to Easter</h1>
+        <div id="countdown" class="subtitle">Time remaining...</div>
+    </header>
+
+    <section class="card">
+        <h2>⚖️ Morning Weigh-In</h2>
+        <div class="input-group">
+            <input type="date" id="entryDate">
+        </div>
+        <div class="row">
+            <div class="input-wrapper">
+                <label>Stones</label>
+                <input type="number" id="weightSt" placeholder="12">
+            </div>
+            <div class="input-wrapper">
+                <label>Pounds</label>
+                <input type="number" id="weightLb" placeholder="10">
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>🔥 Activity & Exercise</h2>
+        
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="toggleActivityMode('auto')">Calculator</button>
+            <button class="tab-btn" onclick="toggleActivityMode('manual')">Manual Entry</button>
+        </div>
+
+        <div id="auto-activity" class="activity-mode">
+            <label>Activity Type</label>
+            <select id="activityType">
+                <option value="0">Select Activity...</option>
+                <option value="11.0">Running (9-10 min/mile)</option>
+                <option value="7.0">Tennis (Doubles)</option>
+                <option value="8.0">Football (6-a-side)</option>
+                <option value="3.5">Walking (Brisk/Leisurely)</option>
+                <option value="3.8">Core / Calisthenics</option>
+                <option value="6.0">Weight Lifting (Vigorous)</option>
+                <option value="3.8">Gardening</option>
+                <option value="3.5">Hoovering / Cleaning</option>
+            </select>
+            
+            <label>Duration (Minutes)</label>
+            <input type="number" id="activityMins" placeholder="30">
+            <button class="action-btn" onclick="addExercise()">Add Activity</button>
+        </div>
+
+        <div id="manual-activity" class="activity-mode hidden">
+            <label>Calories Burned (from Watch)</label>
+            <input type="number" id="manualCals" placeholder="450">
+            <button class="action-btn" onclick="addManualExercise()">Add Manual Data</button>
+        </div>
+
+        <ul id="exerciseList"></ul>
+        <div class="total-burn">Total Extra Burn: <span id="totalBurnDisplay">0</span> kcals</div>
+    </section>
+
+    <section class="card">
+        <h2>🍎 Intake</h2>
+        <div class="row">
+            <div class="input-wrapper">
+                <label>Food Cals (MFP)</label>
+                <input type="number" id="foodCals" placeholder="1800">
+            </div>
+            <div class="input-wrapper">
+                <label>Water (ml)</label>
+                <input type="number" id="waterMl" placeholder="2000">
+            </div>
+        </div>
+        <label>Drinks (Coffee/Beer/Wine)</label>
+        <input type="text" id="drinksDetails" placeholder="2 coffees, 1 glass wine">
+    </section>
+
+    <button class="save-btn" onclick="saveDay()">✅ Save Day</button>
+
+    <section class="card dashboard">
+        <h2>📊 Progress</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-label">Current</span>
+                <span class="stat-val" id="currentWeightDisplay">--</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Easter Goal</span>
+                <span class="stat-val">11st 5lb</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Loss Required</span>
+                <span class="stat-val" id="lossRequiredDisplay">--</span>
+            </div>
+        </div>
+        <div class="prediction-box" id="predictionText">
+            Not enough data to predict yet.
+        </div>
+        <div class="chart-container">
+            <canvas id="weightChart"></canvas>
+        </div>
+        
+        <div style="margin-top: 20px;">
+             <h3>Data Management</h3>
+             <button onclick="clearData()" style="background:#ff4444; font-size: 0.8rem;">Reset All Data</button>
+             <button onclick="exportData()" style="background:#555; font-size: 0.8rem;">Export JSON</button>
+        </div>
+    </section>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
