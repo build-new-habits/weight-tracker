@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Easter Weight Tracker</title>
+    <title>Weight Tracker</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -12,7 +12,7 @@
 
 <div class="container">
     <header>
-        <h1>Road to Easter</h1>
+        <h1>Road to Summer</h1>
         <div id="countdown" class="subtitle">Time remaining...</div>
     </header>
 
@@ -96,8 +96,8 @@
                 <span class="stat-val" id="currentWeightDisplay">--</span>
             </div>
             <div class="stat-box">
-                <span class="stat-label">Easter Goal</span>
-                <span class="stat-val">11st 5lb</span>
+                <span class="stat-label">May 31 Goal</span>
+                <span class="stat-val">11st 7lb</span>
             </div>
             <div class="stat-box">
                 <span class="stat-label">Loss Required</span>
@@ -107,14 +107,30 @@
         <div class="prediction-box" id="predictionText">
             Not enough data to predict yet.
         </div>
+        
         <div class="chart-container">
             <canvas id="weightChart"></canvas>
         </div>
         
-        <div style="margin-top: 20px;">
+        <div style="margin-top: 30px;">
+            <h3>📅 Weekly Targets</h3>
+            <table id="milestone-table" style="width:100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #333; color: #888;">
+                        <th style="text-align: left; padding: 8px;">Date</th>
+                        <th style="text-align: right; padding: 8px;">Target</th>
+                        <th style="text-align: right; padding: 8px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="milestone-body">
+                    </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px;">
              <h3>Data Management</h3>
-             <button onclick="clearData()" style="background:#ff4444; font-size: 0.8rem;">Reset All Data</button>
-             <button onclick="exportData()" style="background:#555; font-size: 0.8rem;">Export JSON</button>
+             <button onclick="clearData()" style="background:#ff4444; color: white; border:none; padding: 8px; border-radius: 4px; cursor: pointer;">Reset All Data</button>
+             <button onclick="exportData()" style="background:#555; color: white; border:none; padding: 8px; border-radius: 4px; cursor: pointer;">Export JSON</button>
         </div>
     </section>
 </div>
